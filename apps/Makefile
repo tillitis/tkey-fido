@@ -25,7 +25,7 @@ RM=/bin/rm
 
 
 .PHONY: all
-all: signer/app.bin timer/app.bin random/app.bin rng_stream/app.bin blink/app.bin nx/app.bin touch/app.bin
+all: signer/app.bin fido/app.bin timer/app.bin random/app.bin rng_stream/app.bin blink/app.bin nx/app.bin touch/app.bin
 
 # C runtime library
 libcrt0/libcrt0.a: libcrt0/crt0.o
@@ -54,13 +54,18 @@ show-%-hash: %/app.bin
 	cd $$(dirname $^) && sha512sum app.bin
 
 check-signer-hash: signer/app.bin
-	cd signer && sha512sum -c app.bin.sha512
+	cd signer && { printf "got:\n"; sha512sum app.bin; printf "expected:\n"; cat app.bin.sha512; sha512sum -c app.bin.sha512; }
 
 # Simple ed25519 signer app
 SIGNEROBJS=signer/main.o signer/app_proto.o
 signer/app.elf: $(LIBS) monocypher/libmonocypher.a $(SIGNEROBJS) app.lds
 	$(CC) $(CFLAGS) $(SIGNEROBJS) $(LDFLAGS) -L monocypher -lmonocypher -I monocypher -o $@
 $(SIGNEROBJS): $(INCLUDE)/tk1_mem.h signer/app_proto.h
+
+FIDOOBJS=fido/main.o fido/app_proto.o fido/rng.o fido/p256-m.o fido/sha-256.o fido/u2f.o
+fido/app.elf: $(LIBS) monocypher/libmonocypher.a $(FIDOOBJS) app.lds
+	$(CC) $(CFLAGS) $(FIDOOBJS) $(LDFLAGS) -L monocypher -lmonocypher -I monocypher -o $@
+$(FIDOOBJS): $(INCLUDE)/tk1_mem.h fido/app_proto.h
 
 # A simpler timer app
 TIMEROBJS = timer/main.o timer/app_proto.o
@@ -97,6 +102,7 @@ $(TOUCHOBJS): $(INCLUDE)/tk1_mem.h
 .PHONY: clean
 clean:
 	$(RM) -f signer/app.bin signer/app.elf $(SIGNEROBJS)
+	$(RM) -f fido/app.bin fido/app.elf $(FIDOOBJS)
 	$(RM) -f timer/app.bin timer/app.elf $(TIMEROBJS)
 	$(RM) -f random/app.bin random/app.elf $(RANDOMOBJS)
 	$(RM) -f rng_stream/app.bin rng_stream/app.elf $(RNG_STREAM_OBJS)
@@ -107,7 +113,7 @@ clean:
 	$(RM) -f touch/app.bin touch/app.elf touch/main.o
 
 # Uses ../.clang-format
-FMTFILES=include/*.h libcommon/*.c signer/*.[ch] timer/*.[ch] random/*.[ch] rng_stream/*.[ch] nx/main.c touch/*.[ch]
+FMTFILES=include/*.h libcommon/*.c signer/*.[ch] fido/main.c fido/u2f.[ch] fido/rng.[ch] timer/*.[ch] random/*.[ch] rng_stream/*.[ch] nx/main.c touch/*.[ch]
 .PHONY: fmt
 fmt:
 	clang-format --dry-run --ferror-limit=0 $(FMTFILES)

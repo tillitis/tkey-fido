@@ -1,7 +1,7 @@
 RM=/bin/rm
 
 .PHONY: all
-all: apps tkey-runapp tkey-sign runsign.sh tkey-ssh-agent runtimer runrandom
+all: apps tkey-runapp tkey-sign runsign.sh tkey-ssh-agent runtimer runrandom tkey-fido
 
 .PHONY: windows
 windows: tkey-ssh-agent.exe tkey-ssh-agent-tray.exe
@@ -63,10 +63,14 @@ runrandom: apps
 	cp -af apps/random/app.bin cmd/runrandom/app.bin
 	go build ./cmd/runrandom
 
+.PHONY: apps/signer/app.bin
+apps/signer/app.bin:
+	make -C apps signer/app.bin
+
 TKEY_SSH_AGENT_VERSION ?=
 # .PHONY to let go-build handle deps and rebuilds
 .PHONY: tkey-ssh-agent
-tkey-ssh-agent: apps
+tkey-ssh-agent: apps/signer/app.bin
 	cp -af apps/signer/app.bin cmd/tkey-ssh-agent/app.bin
 	CGO_ENABLED=0 go build -ldflags "-X main.version=$(TKEY_SSH_AGENT_VERSION) -X main.signerAppNoTouch=$(TKEY_SIGNER_APP_NO_TOUCH)" -trimpath ./cmd/tkey-ssh-agent
 
@@ -82,6 +86,17 @@ tkey-ssh-agent-tray.exe:
 	$(MAKE) -C gotools go-winres
 	cd ./cmd/tkey-ssh-agent-tray && ../../gotools/go-winres make --arch amd64
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-H windowsgui" -trimpath ./cmd/tkey-ssh-agent-tray
+
+.PHONY: apps/fido/app.bin
+apps/fido/app.bin:
+	make -C apps fido/app.bin
+
+TKEY_FIDO_VERSION ?=
+# .PHONY to let go-build handle deps and rebuilds
+.PHONY: tkey-fido
+tkey-fido: apps/fido/app.bin
+	cp -af apps/fido/app.bin cmd/tkey-fido/app.bin
+	CGO_ENABLED=0 go build -ldflags "-X main.version=$(TKEY_FIDO_VERSION)" -trimpath ./cmd/tkey-fido
 
 .PHONY: clean
 clean:
