@@ -88,6 +88,35 @@ func (tk *TillitisKey) Connect(port string, options ...func(*TillitisKey)) error
 		return fmt.Errorf("Open %s: %w", port, err)
 	}
 
+	// We just connected to the TKey, so we'll discard any bytes
+	// waiting to be read. We can't do anything with them, and if the
+	// TKey is in an otherwise good state they would just put
+	// ourselves in a bad state later. Case in point: TKey is waiting
+	// for touch with a timeout. Meanwhile the host-program
+	// disconnects and quits. The timeout occurs and TKey writes a
+	// response to the serial port. A host-program is started,
+	// connects to the TKey, writes a command, and gets confused when
+	// reading the old, pending response first.
+
+	// The coming reset (on Linux it does tcflush(fd, TCFLSH,
+	// TCIFLUSH)) will not work without a little delay first. I found
+	// forum references to that but no real docs. For good measure we
+	// delay before and after the resets.
+	time.Sleep(10 * time.Millisecond)
+	if err = tk.conn.ResetInputBuffer(); err != nil {
+		le.Printf("ResetInputBuffer failed: %s\n", err)
+	}
+
+	// We also discard any bytes written but not yet transmitted. I'm
+	// not sure what our case would be, or if such bytes really can
+	// exist. But I see no harm in doing this.
+	time.Sleep(10 * time.Millisecond)
+	if err = tk.conn.ResetOutputBuffer(); err != nil {
+		le.Printf("ResetOutputBuffer failed: %s\n", err)
+	}
+
+	time.Sleep(10 * time.Millisecond)
+
 	return nil
 }
 
