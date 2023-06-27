@@ -17,8 +17,7 @@ import (
 	"strings"
 
 	"github.com/spf13/pflag"
-	"github.com/tillitis/tillitis-key1-apps/internal/util"
-	"github.com/tillitis/tillitis-key1-apps/tk1"
+	"github.com/tillitis/tkeyclient"
 )
 
 // Use when printing err/diag msgs
@@ -46,7 +45,7 @@ func main() {
 		"List possible serial ports to use with --port.")
 	pflag.StringVar(&devPath, "port", "",
 		"Set serial port device `PATH`. If this is not passed, auto-detection will be attempted.")
-	pflag.IntVar(&speed, "speed", tk1.SerialSpeed,
+	pflag.IntVar(&speed, "speed", tkeyclient.SerialSpeed,
 		"Set serial port speed in `BPS` (bits per second).")
 	pflag.BoolVar(&enterUSS, "uss", false,
 		// TODO revise, and should we use USS?
@@ -133,7 +132,7 @@ func readBuildInfo() string {
 }
 
 func printPorts() (int, error) {
-	ports, err := util.GetSerialPorts()
+	ports, err := tkeyclient.GetSerialPorts()
 	if err != nil {
 		return 0, fmt.Errorf("Failed to list ports: %w", err)
 	}

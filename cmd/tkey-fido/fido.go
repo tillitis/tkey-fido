@@ -15,9 +15,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/tillitis/tillitis-key1-apps/internal/tk1fido"
-	"github.com/tillitis/tillitis-key1-apps/internal/util"
-	"github.com/tillitis/tillitis-key1-apps/tk1"
+	"github.com/tillitis/tkey-fido/internal/tk1fido"
+	"github.com/tillitis/tkeyclient"
+	"github.com/tillitis/tkeyutil"
 )
 
 // nolint:typecheck // Avoid lint error when the embedding file is missing.
@@ -27,7 +27,7 @@ import (
 var appBinary []byte
 
 var notify = func(msg string) {
-	util.Notify(progname, msg)
+	tkeyutil.Notify(progname, msg)
 }
 
 const (
@@ -42,7 +42,7 @@ const (
 // TODO this should really be an exported struct (with members still
 // unexported) in a different pkg
 type fido struct {
-	tk              *tk1.TillitisKey
+	tk              *tkeyclient.TillitisKey
 	tkFido          *tk1fido.Fido
 	devPath         string
 	speed           int
@@ -55,9 +55,9 @@ type fido struct {
 }
 
 func newFido(devPathArg string, speedArg int, enterUSS bool, fileUSS string, pinentry string, exitFunc func(int)) *fido {
-	tk1.SilenceLogging()
+	tkeyclient.SilenceLogging()
 
-	tk := tk1.New()
+	tk := tkeyclient.New()
 
 	tkFido := tk1fido.New(tk)
 	s := &fido{
@@ -98,12 +98,12 @@ func (s *fido) connect() bool {
 	devPath := s.devPath
 	if devPath == "" {
 		var err error
-		devPath, err = util.DetectSerialPort(false)
+		devPath, err = tkeyclient.DetectSerialPort(false)
 		if err != nil {
 			switch {
-			case errors.Is(err, util.ErrNoDevice):
+			case errors.Is(err, tkeyclient.ErrNoDevice):
 				notify("Could not find any TKey plugged in.")
-			case errors.Is(err, util.ErrManyDevices):
+			case errors.Is(err, tkeyclient.ErrManyDevices):
 				notify("Cannot work with more than 1 TKey plugged in.")
 			default:
 				notify(fmt.Sprintf("TKey detection failed: %s\n", err))
@@ -115,7 +115,7 @@ func (s *fido) connect() bool {
 	}
 
 	le.Printf("Connecting to TKey on serial port %s\n", devPath)
-	if err := s.tk.Connect(devPath, tk1.WithSpeed(s.speed)); err != nil {
+	if err := s.tk.Connect(devPath, tkeyclient.WithSpeed(s.speed)); err != nil {
 		notify(fmt.Sprintf("Failed to connect to a TKey on port %v.", devPath))
 		le.Printf("Failed to connect: %v", err)
 		return false
@@ -185,7 +185,7 @@ func (s *fido) loadApp() error {
 		}
 	} else if s.fileUSS != "" {
 		var err error
-		secret, err = util.ReadUSS(s.fileUSS)
+		secret, err = tkeyutil.ReadUSS(s.fileUSS)
 		if err != nil {
 			return fmt.Errorf("Failed to read uss-file %s: %w", s.fileUSS, err)
 		}

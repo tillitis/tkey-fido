@@ -17,37 +17,37 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/tillitis/tillitis-key1-apps/tk1"
+	"github.com/tillitis/tkeyclient"
 )
 
 var (
-	cmdGetNameVersion     = appCmd{0x01, "cmdGetNameVersion", tk1.CmdLen1}
-	rspGetNameVersion     = appCmd{0x02, "rspGetNameVersion", tk1.CmdLen32}
-	cmdU2FRegister        = appCmd{0x03, "cmdU2FRegister", tk1.CmdLen128}
-	rspU2FRegister        = appCmd{0x04, "rspU2FRegister", tk1.CmdLen128}
-	cmdU2FCheckOnly       = appCmd{0x05, "cmdU2FCheckOnly", tk1.CmdLen128}
-	rspU2FCheckOnly       = appCmd{0x06, "rspU2FCheckOnly", tk1.CmdLen4}
-	cmdU2FAuthenticateSet = appCmd{0x07, "cmdU2FAuthenticateSet", tk1.CmdLen128}
-	cmdU2FAuthenticateGo  = appCmd{0x08, "cmdU2FAuthenticateGo", tk1.CmdLen128}
-	rspU2FAuthenticate    = appCmd{0x09, "rspU2FAuthenticate", tk1.CmdLen128}
+	cmdGetNameVersion     = appCmd{0x01, "cmdGetNameVersion", tkeyclient.CmdLen1}
+	rspGetNameVersion     = appCmd{0x02, "rspGetNameVersion", tkeyclient.CmdLen32}
+	cmdU2FRegister        = appCmd{0x03, "cmdU2FRegister", tkeyclient.CmdLen128}
+	rspU2FRegister        = appCmd{0x04, "rspU2FRegister", tkeyclient.CmdLen128}
+	cmdU2FCheckOnly       = appCmd{0x05, "cmdU2FCheckOnly", tkeyclient.CmdLen128}
+	rspU2FCheckOnly       = appCmd{0x06, "rspU2FCheckOnly", tkeyclient.CmdLen4}
+	cmdU2FAuthenticateSet = appCmd{0x07, "cmdU2FAuthenticateSet", tkeyclient.CmdLen128}
+	cmdU2FAuthenticateGo  = appCmd{0x08, "cmdU2FAuthenticateGo", tkeyclient.CmdLen128}
+	rspU2FAuthenticate    = appCmd{0x09, "rspU2FAuthenticate", tkeyclient.CmdLen128}
 )
 
 type appCmd struct {
 	code   byte
 	name   string
-	cmdLen tk1.CmdLen
+	cmdLen tkeyclient.CmdLen
 }
 
 func (c appCmd) Code() byte {
 	return c.code
 }
 
-func (c appCmd) CmdLen() tk1.CmdLen {
+func (c appCmd) CmdLen() tkeyclient.CmdLen {
 	return c.cmdLen
 }
 
-func (c appCmd) Endpoint() tk1.Endpoint {
-	return tk1.DestApp
+func (c appCmd) Endpoint() tkeyclient.Endpoint {
+	return tkeyclient.DestApp
 }
 
 func (c appCmd) String() string {
@@ -55,17 +55,17 @@ func (c appCmd) String() string {
 }
 
 type Fido struct {
-	tk *tk1.TillitisKey // A connection to a TKey
+	tk *tkeyclient.TillitisKey // A connection to a TKey
 }
 
 // New allocates a struct for communicating with the Fido app running
 // on the TKey. You're expected to pass an existing connection to it,
 // so use it like this:
 //
-//	tk := tk1.New()
+//	tk := tkeyclient.New()
 //	err := tk.Connect(port)
-//	fido := tk1fido.New(tk)
-func New(tk *tk1.TillitisKey) Fido {
+//	fido := tkeyclientfido.New(tk)
+func New(tk *tkeyclient.TillitisKey) Fido {
 	var fido Fido
 
 	fido.tk = tk
@@ -83,14 +83,14 @@ func (f Fido) Close() error {
 
 // GetAppNameVersion gets the name and version of the running app in
 // the same style as the stick itself.
-func (f Fido) GetAppNameVersion() (*tk1.NameVersion, error) {
+func (f Fido) GetAppNameVersion() (*tkeyclient.NameVersion, error) {
 	id := 2
-	tx, err := tk1.NewFrameBuf(cmdGetNameVersion, id)
+	tx, err := tkeyclient.NewFrameBuf(cmdGetNameVersion, id)
 	if err != nil {
 		return nil, fmt.Errorf("NewFrameBuf: %w", err)
 	}
 
-	tk1.Dump("GetAppNameVersion tx", tx)
+	tkeyclient.Dump("GetAppNameVersion tx", tx)
 	if err = f.tk.Write(tx); err != nil {
 		return nil, fmt.Errorf("Write: %w", err)
 	}
@@ -110,7 +110,7 @@ func (f Fido) GetAppNameVersion() (*tk1.NameVersion, error) {
 		return nil, fmt.Errorf("SetReadTimeout: %w", err)
 	}
 
-	nameVer := &tk1.NameVersion{}
+	nameVer := &tkeyclient.NameVersion{}
 	nameVer.Unpack(rx[2:])
 
 	return nameVer, nil
@@ -118,20 +118,20 @@ func (f Fido) GetAppNameVersion() (*tk1.NameVersion, error) {
 
 func (f Fido) U2FRegister(appliParam [32]byte) (byte, []byte, []byte, error) {
 	id := 2
-	tx, err := tk1.NewFrameBuf(cmdU2FRegister, id)
+	tx, err := tkeyclient.NewFrameBuf(cmdU2FRegister, id)
 	if err != nil {
 		return 0, nil, nil, fmt.Errorf("NewFrameBuf: %w", err)
 	}
 
 	copy(tx[2:], appliParam[:])
 
-	tk1.Dump("U2FRegister tx", tx)
+	tkeyclient.Dump("U2FRegister tx", tx)
 	if err = f.tk.Write(tx); err != nil {
 		return 0, nil, nil, fmt.Errorf("Write: %w", err)
 	}
 
 	rx, _, err := f.tk.ReadFrame(rspU2FRegister, id)
-	tk1.Dump("U2FRegister rx", rx)
+	tkeyclient.Dump("U2FRegister rx", rx)
 	if err != nil {
 		return 0, nil, nil, fmt.Errorf("ReadFrame: %w", err)
 	}
@@ -139,7 +139,7 @@ func (f Fido) U2FRegister(appliParam [32]byte) (byte, []byte, []byte, error) {
 	rx = rx[2:]
 
 	status, rx := shiftByte(rx)
-	if status != tk1.StatusOK {
+	if status != tkeyclient.StatusOK {
 		return 0, nil, nil, fmt.Errorf("U2FRegister NOK")
 	}
 
@@ -149,7 +149,7 @@ func (f Fido) U2FRegister(appliParam [32]byte) (byte, []byte, []byte, error) {
 	// Now read 2nd response
 
 	rx, _, err = f.tk.ReadFrame(rspU2FRegister, id)
-	tk1.Dump("U2FRegister rx (2nd)", rx)
+	tkeyclient.Dump("U2FRegister rx (2nd)", rx)
 	if err != nil {
 		return 0, nil, nil, fmt.Errorf("ReadFrame (2nd): %w", err)
 	}
@@ -157,7 +157,7 @@ func (f Fido) U2FRegister(appliParam [32]byte) (byte, []byte, []byte, error) {
 	rx = rx[2:]
 
 	status, rx = shiftByte(rx)
-	if status != tk1.StatusOK {
+	if status != tkeyclient.StatusOK {
 		return 0, nil, nil, fmt.Errorf("U2FRegister NOK (2nd)")
 	}
 
@@ -169,7 +169,7 @@ func (f Fido) U2FRegister(appliParam [32]byte) (byte, []byte, []byte, error) {
 
 func (f Fido) U2FCheckOnly(appliParam [32]byte, keyHandle [64]byte) (bool, error) {
 	id := 2
-	tx, err := tk1.NewFrameBuf(cmdU2FCheckOnly, id)
+	tx, err := tkeyclient.NewFrameBuf(cmdU2FCheckOnly, id)
 	if err != nil {
 		return false, fmt.Errorf("NewFrameBuf: %w", err)
 	}
@@ -179,13 +179,13 @@ func (f Fido) U2FCheckOnly(appliParam [32]byte, keyHandle [64]byte) (bool, error
 	buf.Write(keyHandle[:])
 	copy(tx[2:], buf.Bytes())
 
-	tk1.Dump("U2FCheckOnly tx", tx)
+	tkeyclient.Dump("U2FCheckOnly tx", tx)
 	if err = f.tk.Write(tx); err != nil {
 		return false, fmt.Errorf("Write: %w", err)
 	}
 
 	rx, _, err := f.tk.ReadFrame(rspU2FCheckOnly, id)
-	tk1.Dump("U2FCheckOnly rx", rx)
+	tkeyclient.Dump("U2FCheckOnly rx", rx)
 	if err != nil {
 		return false, fmt.Errorf("ReadFrame: %w", err)
 	}
@@ -194,7 +194,7 @@ func (f Fido) U2FCheckOnly(appliParam [32]byte, keyHandle [64]byte) (bool, error
 	rx = rx[2:]
 
 	status, rx := shiftByte(rx)
-	if status != tk1.StatusOK {
+	if status != tkeyclient.StatusOK {
 		return false, fmt.Errorf("U2FCheckOnly NOK")
 	}
 
@@ -213,7 +213,7 @@ func (f Fido) U2FAuthenticate(appliParam, challParam [32]byte, keyHandle [64]byt
 	// Continue with the 2nd command
 
 	id := 2
-	tx, err := tk1.NewFrameBuf(cmdU2FAuthenticateGo, id)
+	tx, err := tkeyclient.NewFrameBuf(cmdU2FAuthenticateGo, id)
 	if err != nil {
 		return false, 0, nil, fmt.Errorf("NewFrameBuf: %w", err)
 	}
@@ -229,13 +229,13 @@ func (f Fido) U2FAuthenticate(appliParam, challParam [32]byte, keyHandle [64]byt
 	_ = binary.Write(&buf, binary.BigEndian, counter)
 	copy(tx[2:], buf.Bytes())
 
-	tk1.Dump("U2FAuthenticateGo tx", tx)
+	tkeyclient.Dump("U2FAuthenticateGo tx", tx)
 	if err = f.tk.Write(tx); err != nil {
 		return false, 0, nil, fmt.Errorf("Write: %w", err)
 	}
 
 	rx, _, err := f.tk.ReadFrame(rspU2FAuthenticate, id)
-	tk1.Dump("U2FAuthenticate rx (Go)", rx)
+	tkeyclient.Dump("U2FAuthenticate rx (Go)", rx)
 	if err != nil {
 		return false, 0, nil, fmt.Errorf("ReadFrame: %w", err)
 	}
@@ -244,7 +244,7 @@ func (f Fido) U2FAuthenticate(appliParam, challParam [32]byte, keyHandle [64]byt
 	rx = rx[2:]
 
 	status, rx := shiftByte(rx)
-	if status != tk1.StatusOK {
+	if status != tkeyclient.StatusOK {
 		return false, 0, nil, fmt.Errorf("U2FAuthenticate NOK")
 	}
 
@@ -272,7 +272,7 @@ func (f Fido) U2FAuthenticate(appliParam, challParam [32]byte, keyHandle [64]byt
 
 func (f Fido) u2fAuthenticateSet(appliParam, challParam [32]byte) error {
 	id := 2
-	tx, err := tk1.NewFrameBuf(cmdU2FAuthenticateSet, id)
+	tx, err := tkeyclient.NewFrameBuf(cmdU2FAuthenticateSet, id)
 	if err != nil {
 		return fmt.Errorf("NewFrameBuf: %w", err)
 	}
@@ -282,13 +282,13 @@ func (f Fido) u2fAuthenticateSet(appliParam, challParam [32]byte) error {
 	buf.Write(challParam[:])
 	copy(tx[2:], buf.Bytes())
 
-	tk1.Dump("U2FAuthenticateSet tx", tx)
+	tkeyclient.Dump("U2FAuthenticateSet tx", tx)
 	if err = f.tk.Write(tx); err != nil {
 		return fmt.Errorf("Write: %w", err)
 	}
 
 	rx, _, err := f.tk.ReadFrame(rspU2FAuthenticate, id)
-	tk1.Dump("U2FAuthenticate rx (Set)", rx)
+	tkeyclient.Dump("U2FAuthenticate rx (Set)", rx)
 	if err != nil {
 		return fmt.Errorf("ReadFrame: %w", err)
 	}
@@ -297,7 +297,7 @@ func (f Fido) u2fAuthenticateSet(appliParam, challParam [32]byte) error {
 	rx = rx[2:]
 
 	status, _ := shiftByte(rx)
-	if status != tk1.StatusOK {
+	if status != tkeyclient.StatusOK {
 		return fmt.Errorf("U2FAuthenticateSet NOK")
 	}
 
