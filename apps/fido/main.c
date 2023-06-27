@@ -1,10 +1,10 @@
 // Copyright (C) 2022, 2023 - Tillitis AB
 // SPDX-License-Identifier: GPL-2.0-only
 
+#include <monocypher/monocypher-ed25519.h>
 #include <tk1_mem.h>
 
 #include "app_proto.h"
-#include "monocypher/monocypher-ed25519.h"
 #include "rng.h"
 #include "u2f.h"
 
