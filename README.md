@@ -11,6 +11,62 @@ change.
 
 See [Release notes](docs/release_notes.md).
 
+## fido application protocol
+
+`fido` has a simple protocol on top of the [TKey Framing
+Protocol](https://dev.tillitis.se/protocol/#framing-protocol) with the
+following requests:
+
+| *command*                  | *FP length* | *code* | *data*                                       | *response*               |
+|----------------------------|-------------|--------|----------------------------------------------|--------------------------|
+| `CMD_GET_NAMEVERSION`      | 1 B         | 0x01   | none                                         | `RSP_GET_NAMEVERSION`    |
+| `APP_CMD_U2F_REGISTER`     | 128 B       | 0x03   | 32 B appli_param from Relying Party          | `RSP_U2F_REGISTER` * 2   |
+| `CMD_U2F_CHECKONLY`        | 128 B       | 0x05   | 32 B appli_param, 64 B keyhandle             | `RSP_U2F_CHECKONLY`      |
+| `CMD_U2F_AUTHENTICATE_SET` | 128 B       | 0x07   | 32 B appli_param, 32 B chall_param           | `RSP_U2F_AUTHENTICATE` 1 |
+| `CMD_U2F_AUTHENTICATE_GO`  | 128 B       | 0x08   | 64 B keyhandle, 1 B check_user, 4 B counter, | `RSP_U2F_AUTHENTICATE` 2 |
+
+All responses begin with a 1 byte Status Code:
+
+| *status code* | *code* |
+|---------------|--------|
+| OK            | 0      |
+| BAD           | 1      |
+
+| *response*               | *FP length* | *code* | *data*                                      |
+|--------------------------|-------------|--------|---------------------------------------------|
+| `RSP_GET_NAMEVERSION`    | 32 B        | 0x02   | 1 B SC, 4 B name0, 4 B name1, 4 B version   |
+| `RSP_U2F_REGISTER` 1     | 128 B       | 0x04   | 1 B SC, 1 B user_presence, 64 B keyhandle   |
+| `RSP_U2F_REGISTER` 2     | 128 B       | 0x04   | 1 B SC, 64 B pubkey                         |
+| `RSP_U2F_CHECKONLY`      | 4 B         | 0x06   | 1 B SC, 1 B bool (keyhandle OK?)            |
+| `RSP_U2F_AUTHENTICATE` 1 | 128 B       | 0x09   | 1 B SC                                      |
+| `RSP_U2F_AUTHENTICATE` 2 | 128 B       | 0x09   | 1 B SC, 1 B keyhandle_ok, 1 B user_presence |
+| `RSP_UNKNOWN_CMD`        | 1 B         | 0xff   | none                                        |
+
+It identifies itself with:
+
+- `name0`: "tk1  "
+- `name1`: "fido"
+
+Please note that `fido` also replies with a `NOK` Framing Protocol
+response status if the endpoint field in the FP header is meant for
+the firmware (endpoint = `DST_FW`). This is recommended for
+well-behaved device applications so the client side can probe for the
+firmware.
+
+Typical use by a client application:
+
+1. Probe for firmware by sending firmware's `GET_NAME_VERSION` with FP
+   header endpoint = `DST_FW`.
+2. If firmware is found, load `fido` device app.
+3. Upon receiving the device app digest back from firmware, switch to
+   start talking the `fido` protocol above.
+4. ...
+
+
+**Please note**: The firmware detection mechanism is not by any means
+secure. If in doubt a user should always remove the TKey and insert it
+again before doing any operation.
+
 ## Licenses and SPDX tags
 
 Unless otherwise noted, the project sources are licensed under the
