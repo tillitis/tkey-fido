@@ -12,8 +12,6 @@ tag="SPDX-License-Identifier:"
 
 missingok_dirs=(
 .github/workflows/
-cmd/tkey-ssh-agent-tray/winres/
-cmd/tkey-ssh-agent/winres/
 debian/
 docs/
 system/windows/
@@ -28,12 +26,8 @@ LICENSE
 Makefile
 README.md
 apps/Makefile
-apps/monocypher/LICENSE
-apps/monocypher/README.md
-apps/rng_stream/README.md
-apps/signer/app.bin.sha512
-apps/signer/runsign.sh
-cmd/tkey-ssh-agent-tray/trayicon.ico
+apps/fido/sha-256.c.orig
+apps/fido/sha-256.h.orig
 dco.md
 go.mod
 go.sum
