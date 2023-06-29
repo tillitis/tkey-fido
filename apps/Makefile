@@ -34,7 +34,7 @@ show-%-hash: %/app.bin
 check-fido-hash: fido/app.bin
 	cd fido && { printf "got:\n"; sha512sum app.bin; printf "expected:\n"; cat app.bin.sha512; sha512sum -c app.bin.sha512; }
 
-FIDOOBJS=fido/main.o fido/app_proto.o fido/rng.o fido/p256-m.o fido/sha-256.o fido/u2f.o
+FIDOOBJS=fido/main.o fido/app_proto.o fido/rng.o fido/p256/p256-m.o fido/sha-256/sha-256.o fido/u2f.o
 fido/app.elf: $(FIDOOBJS)
 	$(CC) $(CFLAGS) $(FIDOOBJS) $(LDFLAGS) -L monocypher -lmonocypher -I monocypher -o $@
 $(FIDOOBJS): $(INCLUDE)/tk1_mem.h fido/app_proto.h

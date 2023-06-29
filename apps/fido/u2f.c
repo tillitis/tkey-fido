@@ -4,8 +4,8 @@
 #include <lib.h>
 #include <tk1_mem.h>
 
-#include "p256-m.h"
-#include "sha-256.h"
+#include "p256/p256-m.h"
+#include "sha-256/sha-256.h"
 #include "u2f.h"
 
 // Outline of method for keyhandle generation and private key
