@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #include <monocypher/monocypher-ed25519.h>
+#include <qemu_debug.h>
 #include <tk1_mem.h>
 
 #include "app_proto.h"
