@@ -42,13 +42,13 @@ jobs:
         run: make LIBDIR=./tkey-libs
 
       - name: check matching fido app hash
-        run: make -C apps check-fido-hash
+        run: make LIBDIR=./tkey-libs check-fido-hash
 
       - name: lint go code
         run: make lint
 
       - name: check fmt of c code
-        run: make -C apps checkfmt
+        run: make checkfmt
 
       - name: check for SPDX tags
         run: ./tools/spdx-ensure

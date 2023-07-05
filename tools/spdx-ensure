@@ -12,9 +12,7 @@ tag="SPDX-License-Identifier:"
 
 missingok_dirs=(
 .github/workflows/
-debian/
 docs/
-system/windows/
 )
 
 missingok_files=(
@@ -25,9 +23,8 @@ missingok_files=(
 LICENSE
 Makefile
 README.md
-apps/Makefile
-apps/fido/sha-256.c.orig
-apps/fido/sha-256.h.orig
+device-fido/sha-256.c.orig
+device-fido/sha-256.h.orig
 dco.md
 go.mod
 go.sum
@@ -35,12 +32,6 @@ gotools/Makefile
 gotools/go.mod
 gotools/go.sum
 system/60-tkey.rules
-system/tkey-ssh-agent.1
-system/tkey-ssh-agent.service.tmpl
-test/attic/test-loop.sh
-test/requirements.txt
-test/run
-test/test-loop.py
 tillitis-ant.png
 )
 
