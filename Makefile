@@ -64,7 +64,7 @@ device-fido/app.elf: $(FIDOOBJS)
 $(FIDOOBJS): $(INCLUDE)/tk1_mem.h device-fido/app_proto.h
 
 # Uses ../.clang-format
-FMTFILES=device-fido/main.c device-fido/u2f.[ch] device-fido/rng.[ch]
+FMTFILES=device-fido/app_proto.[ch] device-fido/main.c device-fido/u2f.[ch] device-fido/rng.[ch]
 .PHONY: fmt
 fmt:
 	clang-format --dry-run --ferror-limit=0 $(FMTFILES)
