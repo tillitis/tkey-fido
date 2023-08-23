@@ -5,9 +5,8 @@
 #ifndef SHA_256_H
 #define SHA_256_H
 
-// #include <stdint.h>
-// #include <string.h>
-#include <lib.h>
+#include <stdint.h>
+#include <tkey/lib.h>
 
 #ifdef __cplusplus
 extern "C" {

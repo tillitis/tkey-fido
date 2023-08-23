@@ -23,8 +23,6 @@ missingok_files=(
 LICENSE
 Makefile
 README.md
-device-fido/sha-256.c.orig
-device-fido/sha-256.h.orig
 dco.md
 go.mod
 go.sum
@@ -32,7 +30,11 @@ gotools/Makefile
 gotools/go.mod
 gotools/go.sum
 system/60-tkey.rules
-tillitis-ant.png
+device-fido/app.bin.sha512
+device-fido/p256/LICENSE
+device-fido/p256/README.md
+device-fido/sha-256/LICENSE.md
+device-fido/sha-256/README.md
 )
 
 is_missingok() {

@@ -1,9 +1,9 @@
 // Copyright (C) 2023 - Tillitis AB
 // SPDX-License-Identifier: GPL-2.0-only
 
-#include <blake2s.h>
-#include <lib.h>
-#include <tk1_mem.h>
+#include <tkey/blake2s.h>
+#include <tkey/lib.h>
+#include <tkey/tk1_mem.h>
 
 #include "p256/p256-m.h"
 #include "sha-256/sha-256.h"

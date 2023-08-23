@@ -6,9 +6,9 @@
 // When loaded and started, this app will continiously generate random data
 // words and send them to the host as a stream of bytes.
 
-#include <blake2s.h>
-#include <lib.h>
-#include <tk1_mem.h>
+#include <tkey/blake2s.h>
+#include <tkey/lib.h>
+#include <tkey/tk1_mem.h>
 
 #include "rng.h"
 

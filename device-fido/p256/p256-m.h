@@ -7,7 +7,8 @@
 #ifndef P256_M_H
 #define P256_M_H
 
-#include <types.h>
+#include <stdint.h>
+#include <stddef.h>
 
 /* Status codes */
 #define P256_SUCCESS            0

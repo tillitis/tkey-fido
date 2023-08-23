@@ -1,7 +1,7 @@
 // Copyright (C) 2023 - Tillitis AB
 // SPDX-License-Identifier: GPL-2.0-only
 
-#include <types.h>
+#include <stdint.h>
 
 void u2f_init();
 

@@ -11,6 +11,13 @@ change.
 
 See [Release notes](docs/release_notes.md).
 
+## Building
+
+Use `build.sh` to clone dependencies and build with native tools.
+
+See [Tillitis Developer Handbook](https://dev.tillitis.se/) for tool
+support.
+
 ## fido application protocol
 
 `fido` has a simple protocol on top of the [TKey Framing

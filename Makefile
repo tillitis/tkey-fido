@@ -30,7 +30,7 @@ CFLAGS = -target riscv32-unknown-none-elf -march=rv32iczmmul -mabi=ilp32 -mcmode
 AS = clang
 ASFLAGS = -target riscv32-unknown-none-elf -march=rv32iczmmul -mabi=ilp32 -mcmodel=medany -mno-relax
 
-LDFLAGS=-T $(LIBDIR)/app.lds -L $(LIBDIR)/libcommon/ -lcommon -L $(LIBDIR)/libcrt0/ -lcrt0 -L $(LIBDIR)/monocypher -lmonocypher
+LDFLAGS=-T $(LIBDIR)/app.lds -L $(LIBDIR) -lcommon -lcrt0 -lmonocypher
 
 .PHONY: install
 install:
@@ -61,7 +61,7 @@ check-fido-hash: device-fido/app.bin
 FIDOOBJS=device-fido/main.o device-fido/app_proto.o device-fido/rng.o device-fido/p256/p256-m.o device-fido/sha-256/sha-256.o device-fido/u2f.o
 device-fido/app.elf: $(FIDOOBJS)
 	$(CC) $(CFLAGS) $(FIDOOBJS) $(LDFLAGS) -L monocypher -lmonocypher -I monocypher -o $@
-$(FIDOOBJS): $(INCLUDE)/tk1_mem.h device-fido/app_proto.h
+$(FIDOOBJS): $(INCLUDE)/tkey/tk1_mem.h device-fido/app_proto.h
 
 # Uses ../.clang-format
 FMTFILES=device-fido/app_proto.[ch] device-fido/main.c device-fido/u2f.[ch] device-fido/rng.[ch]
