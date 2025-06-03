@@ -1,10 +1,18 @@
+# Tillitis TKey U2F/FIDO Experiment - concluded
 
-[![ci](https://github.com/tillitis/tkey-gido/actions/workflows/ci.yaml/badge.svg?branch=main&event=push)](https://github.com/tillitis/tkey-fido/actions/workflows/ci.yaml)
+## WARNING
 
-# Tillitis TKey U2F/FIDO Support
+This is no longer being worked on. Please see
 
-WIP support for U2F/FIDO using the [Tillitis](https://tillitis.se/)
-TKey USB security token.
+https://github.com/tillitis/fido2-demo
+
+for a new beginning.
+
+## Introduction
+
+Early experiment for U2F/FIDO using the
+[Tillitis](https://tillitis.se/) TKey as a backend and a client
+program on Linux using the kernel uhid interface as the USB HID.
 
 Changes might be made to the fido device app, causing the identity to
 change.
